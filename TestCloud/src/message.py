@@ -47,7 +47,7 @@ class MessageHandler:
 class Register(MessageHandler):
 
     def getSendMessage(self):
-        message = Message(7000)
+        message = Message(6001)
         message.put('clientId', self.device.cid)
         return message
 
@@ -57,12 +57,13 @@ class MasterUpdater(MessageHandler):
         updateUrl = self.getUpdateUrl()
         if updateUrl:
             message = Message(7001)
-            message.put('updateUrl', updateUrl)
+            message.put('updateUrl', updateUrl[0])
+            message.put('buildDate', updateUrl[1])
             return message
         else:
             return None
 
-    def getUpdateUrl(self,):
+    def getUpdateUrl(self):
         path = '\\\\10.204.75.220\\htdocs$\\{0}'
         if not os.path.exists(path.format(self.device.model)):
             return None
@@ -80,7 +81,7 @@ class MasterUpdater(MessageHandler):
                     vv = p.findall(v)
                     date = '{0} {1}'.format('-'.join(vv[:3]), ':'.join(vv[3:]))
                     if date > self.device.buildDate:
-                        return 'http://10.204.75.220:8181/{0}/{1}'.format(self.device.model, update_zip)
+                        return ('http://10.204.75.220:8181/{0}/{1}'.format(self.device.model, update_zip), date)
                     break
         return None
 
@@ -93,12 +94,14 @@ class TestingRunner(MessageHandler):
         params = (self.device.model, date, self.device.cid, timestamp)
         tests = [{
                   'id': 1,
+                  'type': 'command',
                   'name': 'monkey',
                   'cmd': 'monkey -s 31 --ignore-crashes --ignore-timeouts --ignore-native-crashes -v -v -v 50000',
                   'uploadPath': '/pub/log/monkey/{0}/{1}/{2}-{3}-monkey.txt'.format(*params)
                  },
                  {
                   'id': 2,
+                  'type': 'command',
                   'name': 'monkey-com.android.settings',
                   'cmd': 'sh start_monkey_exit.sh com.android.settings com.android.settings.Settings 100 5',
                   'uploadPath': '/pub/log/monkey/{0}/{1}/{2}-{3}-monkey-com.android.settings.txt'.format(*params)
