@@ -23,8 +23,8 @@ class Device:
         self.user      = params['user'][0]
         self.buildDate = params['buildDate'][0]
 
-        self.cid = self.register()
-        self.updateBuildDate()
+        #self.cid = self.register()
+        #self.updateBuildDate()
 
     def __str__(self):
         return json.dumps({
@@ -49,7 +49,8 @@ class Device:
                 'build': self.build,
                 'address': self.address,
                 'user': self.user,
-                'buildDate': self.buildDate
+                'buildDate': self.buildDate,
+                'ip': self.protocol.tcpip
         }
 
     def queryId(self):
